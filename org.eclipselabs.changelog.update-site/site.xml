@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.eclipselabs.changelog.feature_1.0.0.201008062047.jar" id="org.eclipselabs.changelog.feature" version="1.0.0.201008062047">
+      <category name="org.eclipselabs.changelog.update-site"/>
+   </feature>
+   <category-def name="org.eclipselabs.changelog.update-site" label="ChangeLog"/>
+</site>
