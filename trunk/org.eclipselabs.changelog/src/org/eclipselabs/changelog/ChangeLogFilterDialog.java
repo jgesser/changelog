@@ -6,26 +6,27 @@
  */
 package org.eclipselabs.changelog;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * @author jcl To change the template for this generated type comment go to
- *         Window - Preferences - Java - Code Generation - Code and Comments
+ * @author jcl To change the template for this generated type comment go to Window - Preferences - Java - Code
+ *         Generation - Code and Comments
  */
 final class ChangeLogFilterDialog extends Dialog {
 
@@ -36,18 +37,14 @@ final class ChangeLogFilterDialog extends Dialog {
 
     private Button andRadio;
 
-    private Combo fromDayCombo;
+    private DateTime fromDateEditor;
 
-    private Combo toDayCombo;
+    private Button disableFromDateCheck;
 
-    private Combo fromMonthCombo;
+    private DateTime toDateEditor;
 
-    private Combo toMonthCombo;
-
-    private Combo fromYearCombo;
-
-    private Combo toYearCombo;
-
+    private Button disableToDateCheck;
+ 
     private Text author;
 
     private Text comment;
@@ -99,59 +96,52 @@ final class ChangeLogFilterDialog extends Dialog {
         comment.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         //"from" date
         label = new Label(topLevel, SWT.NONE);
-        label.setText("FromDate");
-        Composite fdComposite = new Composite(topLevel, SWT.NONE);
+        label.setText("From Date");
+
         GridLayout fdLayout = new GridLayout();
-        fdLayout.numColumns = 3;
+        fdLayout.numColumns = 2;
+        fdLayout.marginHeight = 3;
+        fdLayout.marginWidth = 3;
+        Composite fdComposite = new Composite(topLevel, SWT.NONE);
         fdComposite.setLayout(fdLayout);
-        fromMonthCombo = new Combo(fdComposite, SWT.READ_ONLY);
-        fromDayCombo = new Combo(fdComposite, SWT.READ_ONLY);
-        fromYearCombo = new Combo(fdComposite, SWT.NONE);
-        fromYearCombo.setTextLimit(4);
+        fromDateEditor = new DateTime(fdComposite, SWT.NONE);
+        disableFromDateCheck = new Button(fdComposite, SWT.CHECK);
+        disableFromDateCheck.setText("Ignore");
+        disableFromDateCheck.addSelectionListener(new SelectionListener() {
+            
+            public void widgetSelected(SelectionEvent e) {
+                fromDateEditor.setEnabled(!disableFromDateCheck.getSelection());
+            }
+            
+            public void widgetDefaultSelected(SelectionEvent e) {              
+                fromDateEditor.setEnabled(!disableFromDateCheck.getSelection());
+            }
+        });
         //"to" date
         label = new Label(topLevel, SWT.NONE);
-        label.setText("ToDate");
-        Composite tdComposite = new Composite(topLevel, SWT.NONE);
+        label.setText("To Date");
+        
         GridLayout tdLayout = new GridLayout();
-        tdLayout.numColumns = 3;
+
+        tdLayout.numColumns = 2;
+        tdLayout.marginHeight = 3;
+        tdLayout.marginWidth = 3;
+        Composite tdComposite = new Composite(topLevel, SWT.NONE);
         tdComposite.setLayout(tdLayout);
-        toMonthCombo = new Combo(tdComposite, SWT.READ_ONLY);
-        toDayCombo = new Combo(tdComposite, SWT.READ_ONLY);
-        toYearCombo = new Combo(tdComposite, SWT.NONE);
-        toYearCombo.setTextLimit(4);
-        //set day, month and year combos with numbers
-        //years allows a selection from the past 5 years
-        //or any year written in
-        String days[] = new String[32];
-        days[0] = "---"; //$NON-NLS-1$
-        for (int i = 1; i < 32; i++) {
-            days[i] = String.valueOf(i);
-        }
-        String months[] = new String[13];
-        months[0] = "---"; //$NON-NLS-1$
-        SimpleDateFormat format = new SimpleDateFormat("MMMM"); //$NON-NLS-1$
-        Calendar calendar = Calendar.getInstance();
-        for (int i = 1; i < 13; i++) {
-            calendar.set(Calendar.MONTH, i - 1);
-            months[i] = format.format(calendar.getTime());
-        }
-        String years[] = new String[5];
-        Calendar calender = Calendar.getInstance();
-        for (int i = 0; i < 5; i++) {
-            years[i] = String.valueOf(calender.get(1) - i);
-        }
-        fromDayCombo.setItems(days);
-        fromDayCombo.select(0);
-        toDayCombo.setItems(days);
-        toDayCombo.select(0);
-        fromMonthCombo.setItems(months);
-        fromMonthCombo.select(0);
-        toMonthCombo.setItems(months);
-        toMonthCombo.select(0);
-        fromYearCombo.setItems(years);
-        toYearCombo.setItems(years);
-        fromYearCombo.select(0);
-        toYearCombo.select(0);
+        toDateEditor = new DateTime(tdComposite, SWT.NONE);
+        disableToDateCheck = new Button(tdComposite, SWT.CHECK);
+        disableToDateCheck.setText("Ignore");
+        disableToDateCheck.addSelectionListener(new SelectionListener() {
+            
+            public void widgetSelected(SelectionEvent e) {
+                toDateEditor.setEnabled(!disableToDateCheck.getSelection());
+            }
+            
+            public void widgetDefaultSelected(SelectionEvent e) {
+                toDateEditor.setEnabled(!disableToDateCheck.getSelection());
+            }
+        });
+     
         initializeValues();
         Dialog.applyDialogFont(parent);
         return topLevel;
@@ -172,27 +162,17 @@ final class ChangeLogFilterDialog extends Dialog {
         Calendar calendar = Calendar.getInstance();
         if (filter.getFromDate() != null) {
             calendar.setTime(filter.getFromDate());
-            fromDayCombo.select(calendar.get(Calendar.DATE));
-            fromMonthCombo.select(calendar.get(Calendar.MONTH) + 1);
-            String yearValue = String.valueOf(calendar.get(Calendar.YEAR));
-            int index = fromYearCombo.indexOf(yearValue);
-            if (index == -1) {
-                fromYearCombo.add(yearValue);
-                index = fromYearCombo.indexOf(yearValue);
-            }
-            fromYearCombo.select(index);
+            fromDateEditor.setDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        } else {
+            disableFromDateCheck.setSelection(true);
+            fromDateEditor.setEnabled(false);
         }
         if (filter.getToDate() != null) {
             calendar.setTime(filter.getToDate());
-            toDayCombo.select(calendar.get(Calendar.DATE));
-            toMonthCombo.select(calendar.get(Calendar.MONTH) + 1);
-            String yearValue = String.valueOf(calendar.get(Calendar.YEAR));
-            int index = toYearCombo.indexOf(yearValue);
-            if (index == -1) {
-                toYearCombo.add(yearValue);
-                index = toYearCombo.indexOf(yearValue);
-            }
-            toYearCombo.select(index);
+            toDateEditor.setDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        } else {
+            disableToDateCheck.setSelection(true);
+            toDateEditor.setEnabled(false);
         }
     }
 
@@ -206,22 +186,26 @@ final class ChangeLogFilterDialog extends Dialog {
             return;
         }
         Date fromDate = null;
-        if ((fromMonthCombo.getSelectionIndex() > 0) && (fromDayCombo.getSelectionIndex() > 0) && (fromYearCombo.getText().length() > 0)) {
+        if (!disableFromDateCheck.getSelection()) {
             //set the calendar with the user input
             //set the hours, minutes and seconds to 00
             //so as to cover the whole day
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Integer.parseInt(String.valueOf(fromYearCombo.getText())), fromMonthCombo.getSelectionIndex() - 1, Integer.parseInt(String.valueOf(fromDayCombo.getText())), 00, 00, 00);
+            calendar.set(fromDateEditor.getYear(), fromDateEditor.getMonth(), fromDateEditor.getDay(), 00, 00, 00);
             fromDate = calendar.getTime();
         }
         Date toDate = null;
-        if ((toMonthCombo.getSelectionIndex() > 0) && (toDayCombo.getSelectionIndex() > 0) && (toYearCombo.getText().length() > 0)) {
+        if (!disableToDateCheck.getSelection()) {
             //set the calendar with the user input
             //set the hours, minutes and seconds to 23, 59, 59
             //so as to cover the whole day
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Integer.parseInt(String.valueOf(toYearCombo.getText())), toMonthCombo.getSelectionIndex() - 1, Integer.parseInt(String.valueOf(toDayCombo.getText())), 23, 59, 59);
+            calendar.set(toDateEditor.getYear(), toDateEditor.getMonth(), toDateEditor.getDay(), 23, 59, 59);
             toDate = calendar.getTime();
+        }
+        if ((toDate != null && fromDate != null) && toDate.before(fromDate)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(toDate);
         }
         //create the filter
         filter = new ChangeLogFilter(author.getText(), comment.getText(), fromDate, toDate, orRadio.getSelection());
