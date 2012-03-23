@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ChangeLog Plug-in
 Bundle-SymbolicName: org.eclipselabs.changelog;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-Activator: org.eclipselabs.changelog.CVSChangeLogPlugin
 Bundle-Vendor: Júlio Vilmar Gesser
 Require-Bundle: org.eclipse.team.cvs.core,

@@ -2,7 +2,7 @@
 <feature
       id="org.eclipselabs.changelog.feature"
       label="ChangeLog Feature"
-      version="1.0.0.qualifier"
+      version="1.0.1.qualifier"
       provider-name="Júlio Vilmar Gesser">
 
    <description url="http://www.example.com/description">
