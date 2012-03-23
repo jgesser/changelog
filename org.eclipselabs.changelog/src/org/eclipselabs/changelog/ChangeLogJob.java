@@ -4,9 +4,11 @@
 package org.eclipselabs.changelog;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.core.history.IFileRevision;
 import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteFile;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
 import org.eclipse.team.internal.ccvs.core.ILogEntry;
@@ -94,7 +97,10 @@ final class ChangeLogJob extends Job {
             }
 
             ICVSRemoteResource[] remoteArray = remoteResources.toArray(new ICVSRemoteResource[remoteResources.size()]);
-            RemoteLogOperation rLogOperation = new RemoteLogOperation(view, remoteArray, null, null, lec);
+            
+            CVSTag startTag = createStartTag();
+            CVSTag endTag = createEndTag();
+            RemoteLogOperation rLogOperation = new RemoteLogOperation(view, remoteArray, startTag, endTag, lec);
             rLogOperation.execute(monitor);
 
             Map<String, Map<String, Map<ILogEntry, IResource>>> logEntries = new HashMap<String, Map<String, Map<ILogEntry, IResource>>>();
@@ -125,6 +131,22 @@ final class ChangeLogJob extends Job {
         return new Status(IStatus.OK, CVSChangeLogPlugin.getDefault().getBundle().getSymbolicName(), "Finished");
     }
 
+    private CVSTag createStartTag() {
+        Date startDate = view.getFilter().getFromDate();
+        if (startDate == null) {
+            startDate = view.getFilter().getToDate() == null ? null : new Date(0); 
+        }
+        return startDate == null ? null : new CVSTag(startDate);
+    }
+
+    private CVSTag createEndTag() {
+        Date endDate = view.getFilter().getToDate();
+        if (endDate == null) {
+            endDate = view.getFilter().getFromDate() == null ? null : new Date();
+        }
+        return endDate == null ? null : new CVSTag(endDate);
+    }
+    
     private List<ChangeLogEntry> buildChangeLog(Map<String, Map<String, Map<ILogEntry, IResource>>> authors) {
 
         /*
