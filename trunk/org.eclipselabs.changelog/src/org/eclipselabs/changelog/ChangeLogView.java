@@ -756,7 +756,7 @@ public final class ChangeLogView extends ViewPart implements IPropertyChangeList
 
     @Override
     public void setFocus() {
-        if (this.datesTreeViewer != null) {
+        if (isViewAvailable()) {
             Tree control = this.datesTreeViewer.getTree();
             if (control != null && !control.isDisposed()) {
                 control.setFocus();
@@ -765,7 +765,7 @@ public final class ChangeLogView extends ViewPart implements IPropertyChangeList
     }
 
     public void showChangeLog(final Collection<ChangeLogEntry> logEntries) {
-        if (datesTreeViewer != null) {
+        if (isViewAvailable()) {
             Display display = datesTreeViewer.getControl().getDisplay();
             if (!display.isDisposed()) {
                 display.asyncExec(new Runnable() {
@@ -782,7 +782,7 @@ public final class ChangeLogView extends ViewPart implements IPropertyChangeList
     protected void internalShowChangeLog(Collection<ChangeLogEntry> logEntries) {
         datesTreeViewer.setInput(logEntries);
 
-        if (logEntries.size() > 0) {
+        if (datesTreeViewer.getTree().getItemCount() > 0) {
             datesTreeViewer.getTree().setSelection(datesTreeViewer.getTree().getItem(0));
             updateSelection(datesTreeViewer.getSelection());
         }
@@ -819,9 +819,33 @@ public final class ChangeLogView extends ViewPart implements IPropertyChangeList
         return null;
     }
 
-    public void setFilter(ChangeLogFilter filter) {
+    public void setFilter(ChangeLogFilter filter) {        
+        if (needRefresh(filter)) {
+            refresh();
+        }
         datesTreeViewer.setFilters(new ViewerFilter[] { filter });
         CVSChangeLogPlugin.getDefault().getPreferenceStore().setValue(PREFERENCE_FILTER, filter.toString());
+    }
+    
+    private boolean needRefresh(ChangeLogFilter newFilter) {
+        ViewerFilter[] currentFilters = datesTreeViewer.getFilters();
+        // larger date span demands refreshing, because the cache won't have the entries yet
+        if (currentFilters.length > 0) {
+            ChangeLogFilter currentFilter = (ChangeLogFilter) currentFilters[0];
+            boolean fromIsBefore = false;
+            boolean toIsAfter = false;
+            if (currentFilter.getFromDate() != null) {
+                fromIsBefore = newFilter.getFromDate() == null ? true : newFilter.getFromDate().before(currentFilter.getFromDate());
+            }
+            if (currentFilter.getToDate() != null) {
+                toIsAfter = newFilter.getToDate() == null ? true : newFilter.getToDate().after(currentFilter.getToDate());
+            }
+            if (fromIsBefore || toIsAfter) {
+                return true;
+            }
+        }
+        return false;
+        
     }
 
     protected void openFileInEditor(FileEntry entry) {
@@ -831,6 +855,7 @@ public final class ChangeLogView extends ViewPart implements IPropertyChangeList
             throw new RuntimeException(e);
         }
     }
+    
 
     protected void openFileInCompare(FileEntry entry) {
         IFileRevision[] revisions = changeLogJob.getFileRevisions(entry);
@@ -840,6 +865,10 @@ public final class ChangeLogView extends ViewPart implements IPropertyChangeList
         CompareRevisionAction compareRevisionAction = new CompareRevisionAction(fakePage);
         compareRevisionAction.selectionChanged(new StructuredSelection(revisions));
         compareRevisionAction.run();
+    }
+    
+    private boolean isViewAvailable() {
+        return filesTreeViewer != null && !filesTreeViewer.getTree().isDisposed();
     }
 
     static class ChangeLogEntrySorter extends ViewerSorter {
