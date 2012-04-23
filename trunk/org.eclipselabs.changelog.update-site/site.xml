@@ -3,7 +3,7 @@
    <feature url="features/org.eclipselabs.changelog.feature_1.0.0.201008091250.jar" id="org.eclipselabs.changelog.feature" version="1.0.0.201008091250">
       <category name="org.eclipselabs.changelog.update-site"/>
    </feature>
-   <feature url="features/org.eclipselabs.changelog.feature_1.0.1.201203231513.jar" id="org.eclipselabs.changelog.feature" version="1.0.1.201203231513">
+   <feature url="features/org.eclipselabs.changelog.feature_1.0.2.201204231239.jar" id="org.eclipselabs.changelog.feature" version="1.0.2.201204231239">
       <category name="org.eclipselabs.changelog.update-site"/>
    </feature>
    <category-def name="org.eclipselabs.changelog.update-site" label="ChangeLog"/>

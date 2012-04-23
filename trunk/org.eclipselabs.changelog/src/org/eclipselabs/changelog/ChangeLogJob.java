@@ -130,17 +130,25 @@ final class ChangeLogJob extends Job {
     }
 
     private CVSTag createStartTag() {
-        Date startDate = view.getFilter().getFromDate();
+        ChangeLogFilter filter = view.getFilter();
+        if (filter == null) {
+            return null;
+        }
+        Date startDate = filter.getFromDate();
         if (startDate == null) {
-            startDate = view.getFilter().getToDate() == null ? null : new Date(0); 
+            startDate = filter.getToDate() == null ? null : new Date(0); 
         }
         return startDate == null ? null : new CVSTag(startDate);
     }
 
     private CVSTag createEndTag() {
-        Date endDate = view.getFilter().getToDate();
+        ChangeLogFilter filter = view.getFilter();
+        if (filter == null) {
+            return null;
+        }
+        Date endDate = filter.getToDate();
         if (endDate == null) {
-            endDate = view.getFilter().getFromDate() == null ? null : new Date();
+            endDate = filter.getFromDate() == null ? null : new Date();
         }
         return endDate == null ? null : new CVSTag(endDate);
     }
